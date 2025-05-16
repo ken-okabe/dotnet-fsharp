@@ -18,6 +18,7 @@ MAX_ATTEMPTS_EXT_INSTALL=24 # Approx. 2 minutes for C# + F# extension listing
 
 # Long wait for background processes
 POST_OPEN_WAIT_SECONDS=40
+WAIT_COUNTDOWN_INTERVAL=10 # Interval for countdown messages
 
 # Logging function
 log_message() {
@@ -71,7 +72,6 @@ log_message "Starting workspace setup sequence (triggered by onCreate)..."
 #    ms-dotnettools.vscode-dotnet-runtime should also NOT be in idx.extensions.
 
 # 1. Install & poll for C# extension
-#    (Assuming ms-dotnettools.vscode-dotnet-runtime installs automatically as a dependency)
 install_and_poll_extension "$CSHARP_EXT_ID" "C#"
 if [ $? -ne 0 ]; then log_message "Failed to ensure $CSHARP_EXT_ID installation. Exiting."; exit 1; fi
 
@@ -127,9 +127,21 @@ else
   log_message "Warning: '$PROGRAM_FS_PATH' not found. Cannot open it initially."
 fi
 
-# 5. Wait for OmniSharp/Ionide background processes
-log_message "Waiting $POST_OPEN_WAIT_SECONDS seconds for OmniSharp/Ionide background processes to complete/settle..."
-sleep "$POST_OPEN_WAIT_SECONDS"
+# 5. Wait for OmniSharp/Ionide background processes with countdown
+log_message "Waiting approximately $POST_OPEN_WAIT_SECONDS seconds for OmniSharp/Ionide background processes to complete/settle..."
+elapsed_wait_time=0
+while [ "$elapsed_wait_time" -lt "$POST_OPEN_WAIT_SECONDS" ]; do
+  sleep "$WAIT_COUNTDOWN_INTERVAL"
+  elapsed_wait_time=$((elapsed_wait_time + WAIT_COUNTDOWN_INTERVAL))
+  time_left=$((POST_OPEN_WAIT_SECONDS - elapsed_wait_time))
+  if [ "$time_left" -gt 0 ]; then
+    log_message "Approx. $time_left seconds remaining for background processes..."
+  else
+    log_message "Finishing wait period for background processes..."
+  fi
+done
+log_message "Wait finished."
+
 
 # 6. Re-focus/Re-activate Program.fs to nudge Ionide
 if [ -f "$PROGRAM_FS_PATH" ]; then
