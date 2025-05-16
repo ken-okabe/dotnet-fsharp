@@ -17,9 +17,9 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "ms-dotnettools.vscode-dotnet-runtime"
-      "ms-dotnettools.csharp"
-      "Ionide.Ionide-fsharp"
+      # "ms-dotnettools.vscode-dotnet-runtime"
+      # "ms-dotnettools.csharp"
+      # "Ionide.Ionide-fsharp"
     ];
     # Enable previews
     previews = {
@@ -41,10 +41,8 @@
     workspace = {
       # Runs when a workspace is first created
       onCreate = {
-        # Example: install JS dependencies from NPM
-        # npm-install = "npm install";
-        # Open editors for the following files by default, if they exist:
-        default.openFiles = [ ".idx/dev.nix" "README.md" ]; # You can add F# project files, etc., as needed
+        setup-extensions = ".idx/setup_workspace.sh";
+        default.openFiles = [ ".idx/dev.nix" /* Consider removing README.md from here if opened by script */ ];
       };
       # Runs when the workspace is (re)started
       onStart = {
