@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # --- Configuration ---
-RUNTIME_EXT_ID="ms-dotnettools.vscode-dotnet-runtime"
-CSHARP_EXT_ID="muhammad-sammy.csharp" # The C# extension currently identified in your environment
+# RUNTIME_EXT_ID="ms-dotnettools.vscode-dotnet-runtime" # No longer explicitly installed by this script
+CSHARP_EXT_ID="muhammad-sammy.csharp" # The C# extension to install first
 FSHARP_EXT_ID="ionide.ionide-fsharp"
-NEW_FSHARP_PROJECT_NAME="HelloApp" # Changed project name
+NEW_FSHARP_PROJECT_NAME="HelloApp" # Project name
 
 # Commands in IDX environment (adjust if necessary)
 INSTALL_CMD="code --install-extension"
@@ -14,7 +14,7 @@ DOTNET_CMD="dotnet" # Command for dotnet CLI
 
 # Polling settings
 POLL_INTERVAL_SECONDS=5
-MAX_ATTEMPTS=36 # Approx. 3 minutes (36 * 5s)
+MAX_ATTEMPTS=24 # Approx. 2 minutes (24 * 5s) - adjust if C# + deps take longer
 
 # Logging function
 log_message() {
@@ -36,6 +36,7 @@ install_and_poll_extension() {
   local ext_id_to_install="$1"
   local ext_friendly_name="$2"
 
+  # If already listed, skip installation
   if is_extension_listed "$ext_id_to_install"; then
     log_message "$ext_friendly_name ($ext_id_to_install) is already listed. Skipping installation."
     return 0
@@ -64,24 +65,26 @@ install_and_poll_extension() {
 log_message "Starting workspace setup sequence (triggered by onCreate)..."
 
 # 0. IMPORTANT: From your .idx/dev.nix file's idx.extensions list,
-#    remove or comment out the extension IDs that are managed by this script.
+#    remove or comment out $CSHARP_EXT_ID and $FSHARP_EXT_ID.
+#    ms-dotnettools.vscode-dotnet-runtime should also NOT be in idx.extensions if relying on auto-install.
 
-# 1. Install & poll for .NET Runtime extension
-install_and_poll_extension "$RUNTIME_EXT_ID" ".NET Runtime"
-if [ $? -ne 0 ]; then log_message "Failed to ensure $RUNTIME_EXT_ID installation. Exiting."; exit 1; fi
-
-# 2. Install & poll for C# extension
+# 1. Install & poll for C# extension
+#    (Assuming ms-dotnettools.vscode-dotnet-runtime installs automatically as a dependency)
 install_and_poll_extension "$CSHARP_EXT_ID" "C#"
 if [ $? -ne 0 ]; then log_message "Failed to ensure $CSHARP_EXT_ID installation. Exiting."; exit 1; fi
+# Optional: Add a check here to see if ms-dotnettools.vscode-dotnet-runtime also got listed.
+# if ! is_extension_listed "ms-dotnettools.vscode-dotnet-runtime"; then
+#   log_message "Warning: ms-dotnettools.vscode-dotnet-runtime was not automatically listed after C# extension install."
+# fi
 
-# 3. Install & poll for F# (Ionide) extension
+# 2. Install & poll for F# (Ionide) extension
 install_and_poll_extension "$FSHARP_EXT_ID" "F# (Ionide)"
 if [ $? -ne 0 ]; then log_message "Failed to ensure $FSHARP_EXT_ID installation. Exiting."; exit 1; fi
 
-log_message "All three core extensions (.NET Runtime, C#, F#) are now listed."
+log_message "Core extensions (C# and F#) are now listed."
 
-# 4. Create a new F# console project if it doesn't exist
-PROJECT_PATH="./$NEW_FSHARP_PROJECT_NAME" # Project will be created in the workspace root
+# 3. Create a new F# console project and write content to Program.fs if project doesn't exist
+PROJECT_PATH="./$NEW_FSHARP_PROJECT_NAME"
 PROGRAM_FS_PATH="$PROJECT_PATH/Program.fs"
 
 if [ ! -d "$PROJECT_PATH" ]; then
@@ -89,28 +92,44 @@ if [ ! -d "$PROJECT_PATH" ]; then
   $DOTNET_CMD new console -lang "F#" -o "$PROJECT_PATH"
   if [ $? -ne 0 ]; then
     log_message "Error: Failed to create F# console project in '$PROJECT_PATH'."
-    log_message "Please check .NET SDK installation and permissions."
-    exit 1 # Exit if project creation fails
+    exit 1
   fi
   log_message "F# console project '$NEW_FSHARP_PROJECT_NAME' created successfully."
-  log_message "Waiting 5 seconds for file system and IDE to settle after project creation..."
-  sleep 5 # <<<< ADDED DELAY >>>>
+
+  log_message "Writing custom content to $PROGRAM_FS_PATH..."
+  cat << EOF > "$PROGRAM_FS_PATH"
+printfn "Hello from F#"
+
+let a = 5
+
+let f =
+    fun a -> a * 2
+
+let x = a |> f
+
+x |> printfn "%d"
+EOF
+  if [ $? -ne 0 ]; then
+    log_message "Error: Failed to write content to $PROGRAM_FS_PATH."
+  else
+    log_message "Custom content written to $PROGRAM_FS_PATH."
+  fi
+
+  log_message "Waiting 5 seconds for file system and IDE to settle after project creation and file modification..."
+  sleep 5
 else
-  log_message "Project directory '$PROJECT_PATH' already exists. Skipping project creation."
-  # Optionally, add a smaller delay here too if opening existing projects also shows timing issues
-  # sleep 2
+  log_message "Project directory '$PROJECT_PATH' already exists. Skipping project creation and Program.fs modification."
 fi
 
-# 5. Open the Program.fs file from the new project
+# 4. Open the Program.fs file from the project
 if [ -f "$PROGRAM_FS_PATH" ]; then
   log_message "Attempting to open '$PROGRAM_FS_PATH' in the editor..."
   $OPEN_CMD "$PROGRAM_FS_PATH"
 else
-  log_message "Warning: '$PROGRAM_FS_PATH' not found. Cannot open it. Project creation might have failed or the path is incorrect."
+  log_message "Warning: '$PROGRAM_FS_PATH' not found. Cannot open it."
 fi
 
 log_message "Workspace setup script finished."
-log_message "IMPORTANT: This script attempts to replicate the successful manual workflow."
-log_message "If Ionide still has issues recognizing your F# project (e.g., 'Program.fs not in any project known to Ionide'), a 'Developer: Reload Window' or further debugging of Ionide's logs might be necessary."
+log_message "IMPORTANT: If issues persist, 'Developer: Reload Window' or checking Ionide's logs might be necessary."
 
 exit 0
