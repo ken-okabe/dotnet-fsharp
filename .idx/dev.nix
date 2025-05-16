@@ -17,8 +17,13 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "Ionide.Ionide-fsharp" # Add Ionide F# extension
+      "ms-dotnettools.csharp"   # Add official Microsoft C# extension
+      "Ionide.Ionide-fsharp"    # Ionide F# extension
       # "vscodevim.vim"
+      # Note: The image also showed "ms-dotnettools.vscode-dotnet-runtime" (labeled as .NET Install Tool).
+      # This extension often gets installed automatically with the C# extension or if .NET SDK interactions are needed by the IDE.
+      # If it's not automatically handled, you might need to add "ms-dotnettools.vscode-dotnet-runtime" to this list as well.
+      # However, since we are managing the .NET SDK via Nix, its direct necessity might be reduced but IDX might still expect it for its internal logic.
     ];
     # Enable previews
     previews = {
