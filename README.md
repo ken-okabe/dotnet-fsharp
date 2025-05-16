@@ -1,6 +1,13 @@
 # Firebase Studio F# Starter Kit
 
-## What is Firebase Studio? (For Beginners)
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747377487362.png)
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747377989906.png)
+
+This starter kit aims to provide a robust and smooth out-of-the-box F# experience on Google Firebase Studio. Happy  F# coding!
+
+### What is Firebase Studio? (For Beginners)
+
 Firebase Studio is a development platform provided on Google Cloud, differing from traditional methods where you set up an environment on your local computer.
 
 All you need is a web browser to access it from anywhere and start building full-featured applications online, without complex local setup.
@@ -9,7 +16,7 @@ Furthermore, the development interface in Firebase Studio offers an experience v
 
 Familiarity gained with operations in Firebase Studio will be highly transferable and beneficial should you use VS Code in a local environment in the future.
 
----
+## Rocket Start for F# Development Environment
 
 Welcome! This repository is a starter kit designed to help you quickly and smoothly set up an F# development environment within Firebase Studio (which is based on Project IDX).
 
@@ -19,19 +26,33 @@ This platform is a powerful cloud-based development environment. However, especi
 
 ## 🚀 Getting Started
 
-1.  **Import this Repository into Firebase Studio:**
-    On the Firebase Studio workspace creation screen, select the "Import a repository" option and provide the Git repository URL for this starter kit.
-    * This repository's URL: `[Enter your repository URL here, or instruct users to use the URL of their fork]`
-    * Official Firebase Studio (IDX) documentation on importing Git repositories:
-        * [Git integration - Import a Git repository](https://firebase.google.com/docs/studio/git-integration#import_a_git_repository_to_a_new_workspace) (This is Project IDX documentation, which Firebase Studio is built upon and shares similar features)
+### 0. https://firebase.studio/
 
-2.  **Wait for Initial Workspace Creation:**
-    An initialization script, configured in the `onCreate` hook, will run automatically. This script installs necessary extensions, creates a sample F# project (`HelloApp`), and writes some initial code. This process might take a few minutes. You may be able to see the script's progress in the IDX terminal or logs (look for messages prefixed with `[WorkspaceSetupScript]`).
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747378995760.png)
 
-3.  **Start Developing:**
-    Once the initialization script is complete, `HelloApp/Program.fs` should open in the editor, and you should have full F# language support from Ionide (the F# extension), including type annotations and code completion.
+### 1.  **Import this Repository into Firebase Studio:**
 
-    `[Add a screenshot here of the workspace after initialization - e.g., Program.fs open with type annotations visible]`
+### `https://github.com/ken-okabe/dotnet-fsharp`
+
+On the Firebase Studio workspace creation screen, select the "Import a repository" option and provide the Git repository URL for this starter kit.
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747379628566.png)
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747379808132.png)
+
+### 2.  **Wait for Initial Workspace Creation:**
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747379994030.png)
+
+An initialization script, configured in the `onCreate` hook, will run automatically. This script installs necessary extensions, creates a sample F# project (`HelloApp`), and writes some initial code. This process might take a few minutes. You may be able to see the script's progress in the IDX terminal or logs (look for messages prefixed with `[WorkspaceSetupScript]`).
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747380083771.png)
+
+### 3.  **Start Developing:**
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747380163450.png)
+
+Once the initialization script is complete, `HelloApp/Program.fs` should open in the editor, and you should have full F# language support from Ionide (the F# extension), including type annotations and code completion.
 
 ## ✨ What it Does (The "Magic" Explained)
 
@@ -40,7 +61,7 @@ This starter kit leverages Firebase Studio's environment definition capabilities
 * **Environment Definition (`.idx/dev.nix`):**
     Provides the base .NET SDK. (Note: In this kit, VS Code extensions are primarily installed by the script for better control over timing and to work around potential activation issues.)
 
-* **Initialization Script (e.g., `.idx/YOUR_SCRIPT_NAME.sh`):**
+* **Initialization Script (e.g., `.idx/setup_workspace.sh`):**
     This script runs once when the workspace is created (via the `onCreate` hook in `dev.nix`) and performs the following actions sequentially:
     1.  **Installs the C# Extension:** Provides fundamental .NET support that F# (Ionide) relies on. (The script currently uses `muhammad-sammy.csharp` as identified in the working environment, but you can switch to `ms-dotnettools.csharp` (Microsoft official) if preferred, by editing the script.)
         * The `.NET Runtime Support` extension (`ms-dotnettools.vscode-dotnet-runtime`) is expected to be installed automatically as a dependency of the C# extension.
@@ -49,14 +70,14 @@ This starter kit leverages Firebase Studio's environment definition capabilities
     4.  **Writes Initial Code:** Populates `HelloApp/Program.fs` with some basic F# code.
     5.  **Opens `Program.fs`:** Opens the newly created file in the editor.
     6.  **Waits for Timing Adjustment & Re-focuses File:** This is the "secret sauce" of this kit! .NET extensions (especially OmniSharp, used by C#, and Ionide for F#) can take some time for all their background services to fully initialize. Opening an F# file too soon can lead to Ionide not recognizing the project context correctly. Therefore, the script introduces a deliberate delay *after* initially opening the file and then re-focuses (re-opens) the file. This "nudge" helps ensure Ionide properly "catches" the project context after dependent services have had more time to settle.
-        `[Add a screenshot here of the script's log showing the wait/countdown messages (optional)]`
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747380466527.png)
 
 ## 🔧 Key Extensions Installed (by script)
 
 * **C# for Visual Studio Code** (This kit uses `muhammad-sammy.csharp` by default, as per the debugging journey) - Provides base .NET project support, often via OmniSharp.
 * **Ionide-fsharp** - Comprehensive language support for F# (autocompletion, type hints, error checking, etc.).
 * _(.NET Runtime Extension (`ms-dotnettools.vscode-dotnet-runtime`) - Expected to be auto-installed as a C# extension dependency)_
-
 
 ## 🤔 Troubleshooting / Notes
 
@@ -74,5 +95,3 @@ This starter kit leverages Firebase Studio's environment definition capabilities
 * **F# Software Foundation:** [https://fsharp.org/](https://fsharp.org/)
 
 ---
-
-This starter kit aims to provide a robust and smooth out-of-the-box F# experience on Firebase Studio. Happy coding!
