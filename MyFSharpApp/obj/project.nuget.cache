@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "R+MFhnaJZTU=",
+  "success": true,
+  "projectFilePath": "/home/user/dotnet-fsharp/MyFSharpApp/MyFSharpApp.fsproj",
+  "expectedPackageFiles": [
+    "/home/user/.nuget/packages/fsharp.core/8.0.300/fsharp.core.8.0.300.nupkg.sha512"
+  ],
+  "logs": []
+}
