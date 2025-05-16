@@ -42,7 +42,7 @@
       # Runs when a workspace is first created
       onCreate = {
         setup-extensions = ".idx/setup_workspace.sh";
-        default.openFiles = [ ".idx/dev.nix" /* Consider removing README.md from here if opened by script */ ];
+        default.openFiles = [ "README.md" ];
       };
       # Runs when the workspace is (re)started
       onStart = {

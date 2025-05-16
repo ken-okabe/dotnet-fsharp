@@ -4,7 +4,7 @@
 RUNTIME_EXT_ID="ms-dotnettools.vscode-dotnet-runtime"
 CSHARP_EXT_ID="muhammad-sammy.csharp" # The C# extension currently identified in your environment
 FSHARP_EXT_ID="ionide.ionide-fsharp"
-NEW_FSHARP_PROJECT_NAME="ScriptedFSharpConsoleApp" # Name for the new F# project
+NEW_FSHARP_PROJECT_NAME="HelloApp" # Changed project name
 
 # Commands in IDX environment (adjust if necessary)
 INSTALL_CMD="code --install-extension"
@@ -81,7 +81,7 @@ if [ $? -ne 0 ]; then log_message "Failed to ensure $FSHARP_EXT_ID installation.
 log_message "All three core extensions (.NET Runtime, C#, F#) are now listed."
 
 # 4. Create a new F# console project if it doesn't exist
-PROJECT_PATH="./$NEW_FSHARP_PROJECT_NAME" # Create in the workspace root
+PROJECT_PATH="./$NEW_FSHARP_PROJECT_NAME" # Project will be created in the workspace root
 PROGRAM_FS_PATH="$PROJECT_PATH/Program.fs"
 
 if [ ! -d "$PROJECT_PATH" ]; then
@@ -90,11 +90,15 @@ if [ ! -d "$PROJECT_PATH" ]; then
   if [ $? -ne 0 ]; then
     log_message "Error: Failed to create F# console project in '$PROJECT_PATH'."
     log_message "Please check .NET SDK installation and permissions."
-    exit 1
+    exit 1 # Exit if project creation fails
   fi
   log_message "F# console project '$NEW_FSHARP_PROJECT_NAME' created successfully."
+  log_message "Waiting 5 seconds for file system and IDE to settle after project creation..."
+  sleep 5 # <<<< ADDED DELAY >>>>
 else
   log_message "Project directory '$PROJECT_PATH' already exists. Skipping project creation."
+  # Optionally, add a smaller delay here too if opening existing projects also shows timing issues
+  # sleep 2
 fi
 
 # 5. Open the Program.fs file from the new project
@@ -107,6 +111,6 @@ fi
 
 log_message "Workspace setup script finished."
 log_message "IMPORTANT: This script attempts to replicate the successful manual workflow."
-log_message "If Ionide still has issues, further debugging of Ionide's logs or a 'Developer: Reload Window' might be necessary."
+log_message "If Ionide still has issues recognizing your F# project (e.g., 'Program.fs not in any project known to Ionide'), a 'Developer: Reload Window' or further debugging of Ionide's logs might be necessary."
 
 exit 0
