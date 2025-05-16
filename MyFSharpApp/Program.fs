@@ -9,3 +9,4 @@ let f =
 let x = a |> f
 
 x |> printfn "%d"
+

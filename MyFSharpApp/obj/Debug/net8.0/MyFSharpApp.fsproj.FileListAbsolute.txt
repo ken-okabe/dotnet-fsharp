@@ -27,3 +27,4 @@
 /home/user/dotnet-fsharp/MyFSharpApp/obj/Debug/net8.0/MyFSharpApp.pdb
 /home/user/dotnet-fsharp/MyFSharpApp/obj/Debug/net8.0/MyFSharpApp.genruntimeconfig.cache
 /home/user/dotnet-fsharp/MyFSharpApp/obj/Debug/net8.0/ref/MyFSharpApp.dll
+/home/user/dotnet-fsharp/MyFSharpApp/obj/Debug/net8.0/MyFSharpApp.sourcelink.json
