@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- Configuration ---
-# RUNTIME_EXT_ID="ms-dotnettools.vscode-dotnet-runtime" # No longer explicitly installed by this script
+# RUNTIME_EXT_ID="ms-dotnettools.vscode-dotnet-runtime" # Not explicitly installed; assuming C# extension dependency
 CSHARP_EXT_ID="muhammad-sammy.csharp" # The C# extension to install first
 FSHARP_EXT_ID="ionide.ionide-fsharp"
 NEW_FSHARP_PROJECT_NAME="HelloApp" # Project name
@@ -14,7 +14,10 @@ DOTNET_CMD="dotnet" # Command for dotnet CLI
 
 # Polling settings
 POLL_INTERVAL_SECONDS=5
-MAX_ATTEMPTS=24 # Approx. 2 minutes (24 * 5s) - adjust if C# + deps take longer
+MAX_ATTEMPTS_EXT_INSTALL=24 # Approx. 2 minutes for C# + F# extension listing
+
+# Long wait for background processes
+POST_OPEN_WAIT_SECONDS=40
 
 # Logging function
 log_message() {
@@ -36,7 +39,6 @@ install_and_poll_extension() {
   local ext_id_to_install="$1"
   local ext_friendly_name="$2"
 
-  # If already listed, skip installation
   if is_extension_listed "$ext_id_to_install"; then
     log_message "$ext_friendly_name ($ext_id_to_install) is already listed. Skipping installation."
     return 0
@@ -49,12 +51,12 @@ install_and_poll_extension() {
   local attempts=0
   until is_extension_listed "$ext_id_to_install"; do
     attempts=$((attempts + 1))
-    if [ "$attempts" -ge "$MAX_ATTEMPTS" ]; then
-      log_message "Error: $ext_friendly_name ($ext_id_to_install) was not listed after $MAX_ATTEMPTS attempts."
-      log_message "Aborting further operations. Please check logs and installed extensions."
+    if [ "$attempts" -ge "$MAX_ATTEMPTS_EXT_INSTALL" ]; then
+      log_message "Error: $ext_friendly_name ($ext_id_to_install) was not listed after $MAX_ATTEMPTS_EXT_INSTALL attempts."
+      log_message "Aborting further operations."
       return 1 # Failed
     fi
-    log_message "Attempt $attempts/$MAX_ATTEMPTS: $ext_friendly_name ($ext_id_to_install) not yet listed. Waiting $POLL_INTERVAL_SECONDS seconds..."
+    log_message "Attempt $attempts/$MAX_ATTEMPTS_EXT_INSTALL: $ext_friendly_name ($ext_id_to_install) not yet listed. Waiting $POLL_INTERVAL_SECONDS seconds..."
     sleep "$POLL_INTERVAL_SECONDS"
   done
   log_message "$ext_friendly_name ($ext_id_to_install) is now listed."
@@ -66,16 +68,12 @@ log_message "Starting workspace setup sequence (triggered by onCreate)..."
 
 # 0. IMPORTANT: From your .idx/dev.nix file's idx.extensions list,
 #    remove or comment out $CSHARP_EXT_ID and $FSHARP_EXT_ID.
-#    ms-dotnettools.vscode-dotnet-runtime should also NOT be in idx.extensions if relying on auto-install.
+#    ms-dotnettools.vscode-dotnet-runtime should also NOT be in idx.extensions.
 
 # 1. Install & poll for C# extension
 #    (Assuming ms-dotnettools.vscode-dotnet-runtime installs automatically as a dependency)
 install_and_poll_extension "$CSHARP_EXT_ID" "C#"
 if [ $? -ne 0 ]; then log_message "Failed to ensure $CSHARP_EXT_ID installation. Exiting."; exit 1; fi
-# Optional: Add a check here to see if ms-dotnettools.vscode-dotnet-runtime also got listed.
-# if ! is_extension_listed "ms-dotnettools.vscode-dotnet-runtime"; then
-#   log_message "Warning: ms-dotnettools.vscode-dotnet-runtime was not automatically listed after C# extension install."
-# fi
 
 # 2. Install & poll for F# (Ionide) extension
 install_and_poll_extension "$FSHARP_EXT_ID" "F# (Ionide)"
@@ -121,15 +119,28 @@ else
   log_message "Project directory '$PROJECT_PATH' already exists. Skipping project creation and Program.fs modification."
 fi
 
-# 4. Open the Program.fs file from the project
+# 4. Open the Program.fs file from the project (first attempt)
 if [ -f "$PROGRAM_FS_PATH" ]; then
-  log_message "Attempting to open '$PROGRAM_FS_PATH' in the editor..."
+  log_message "Attempting to open '$PROGRAM_FS_PATH' in the editor (first time)..."
   $OPEN_CMD "$PROGRAM_FS_PATH"
 else
-  log_message "Warning: '$PROGRAM_FS_PATH' not found. Cannot open it."
+  log_message "Warning: '$PROGRAM_FS_PATH' not found. Cannot open it initially."
+fi
+
+# 5. Wait for OmniSharp/Ionide background processes
+log_message "Waiting $POST_OPEN_WAIT_SECONDS seconds for OmniSharp/Ionide background processes to complete/settle..."
+sleep "$POST_OPEN_WAIT_SECONDS"
+
+# 6. Re-focus/Re-activate Program.fs to nudge Ionide
+if [ -f "$PROGRAM_FS_PATH" ]; then
+  log_message "Attempting to re-focus/re-activate '$PROGRAM_FS_PATH' to trigger Ionide..."
+  $OPEN_CMD "$PROGRAM_FS_PATH"
+else
+  log_message "Warning: '$PROGRAM_FS_PATH' not found. Cannot re-focus it."
 fi
 
 log_message "Workspace setup script finished."
-log_message "IMPORTANT: If issues persist, 'Developer: Reload Window' or checking Ionide's logs might be necessary."
+log_message "Check if Ionide features (e.g., type annotations) are now working in '$PROGRAM_FS_PATH'."
+log_message "If issues persist, a 'Developer: Reload Window' or checking Ionide's logs might still be necessary."
 
 exit 0
