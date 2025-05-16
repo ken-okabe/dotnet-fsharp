@@ -1,4 +1,6 @@
-# Firebase Studio F# Starter Kit
+# F# Development Starter Kit for Firebase Studio
+
+### with AI Assistant - Gemini 2.5 Pro/Flash
 
 ![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747377487362.png)
 
@@ -44,7 +46,7 @@ On the Firebase Studio workspace creation screen, select the "Import a repositor
 
 ![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747379994030.png)
 
-An initialization script, configured in the `onCreate` hook, will run automatically. This script installs necessary extensions, creates a sample F# project (`HelloApp`), and writes some initial code. This process might take a few minutes. You may be able to see the script's progress in the IDX terminal or logs (look for messages prefixed with `[WorkspaceSetupScript]`).
+An initialization script, configured in the `onCreate` hook, will run automatically. This script installs necessary extensions, creates a sample F# project (`HelloApp`), and writes some initial code. This process might take a few minutes. You may be able to see the script's progress in the IDX terminal or logs.
 
 ![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747380083771.png)
 
@@ -53,6 +55,10 @@ An initialization script, configured in the `onCreate` hook, will run automatica
 ![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747380163450.png)
 
 Once the initialization script is complete, `HelloApp/Program.fs` should open in the editor, and you should have full F# language support from Ionide (the F# extension), including type annotations and code completion.
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747381299753.png)
+
+![image](https://raw.githubusercontent.com/ken-okabe/web-images5/main/img_1747381327082.png)
 
 ## ✨ What it Does (The "Magic" Explained)
 
